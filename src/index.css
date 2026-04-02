@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-blue: #1652f0;
+  --brand-accent: #ff5150;
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: rgba(15, 23, 42, 0.12);
+  --surface: rgba(255, 255, 255, 0.94);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: #f8fafc;
+}
+
+@layer components {
+  .ui-panel {
+    @apply border backdrop-blur-sm;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: var(--line);
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  }
+
+  .ui-card {
+    @apply border bg-white;
+    border-color: var(--line);
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  }
+
+  .ui-button-primary {
+    @apply inline-flex items-center justify-center text-white transition-opacity disabled:opacity-60;
+    background: var(--brand-accent);
+    border-radius: 5px;
+  }
+
+  .ui-chip {
+    @apply inline-flex items-center gap-2 border text-sm font-semibold;
+    background-color: rgba(255, 255, 255, 0.92);
+    border-color: var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+  }
+
+  .ui-title {
+    @apply font-semibold tracking-[-0.04em];
+    color: var(--ink);
+  }
+
+  .ui-subtle {
+    color: var(--muted);
+  }
+}
