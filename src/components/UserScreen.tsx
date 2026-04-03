@@ -144,7 +144,7 @@ export function UserScreen({ pollId }: { pollId: string }) {
 
   const optionBadges = currentQuestion?.options.map((option, index) => ({
     key: option,
-    label: String.fromCharCode(65 + index),
+    label: String.fromCharCode(97 + index),
     text: option
   })) ?? [];
 

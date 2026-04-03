@@ -200,7 +200,7 @@ export function ControlScreen({ pollId }: { pollId: string }) {
                   {currentQuestion.options.map((option, index) => (
                     <div key={index} className="relative ml-5 flex min-h-[52px] items-center overflow-visible rounded-[8px] border border-slate-200 bg-white pl-10 pr-3 py-3">
                       <div className="absolute left-0 top-1/2 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#FF5150] text-lg font-black leading-none text-white">
-                        {String.fromCharCode(65 + index)}
+                        {String.fromCharCode(97 + index)}
                       </div>
                       <span className="text-[1.08rem] text-gray-700">{option}</span>
                     </div>

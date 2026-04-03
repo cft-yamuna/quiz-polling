@@ -173,10 +173,10 @@ export function MainScreen({ pollId }: { pollId: string }) {
 
   const optionBadges = currentQuestion?.options.map((option, index) => ({
     key: option,
-    label: String.fromCharCode(65 + index),
+    label: String.fromCharCode(97 + index),
     text: option
   })) ?? [];
-  const liveQrSize = 'clamp(150px, 5.8vw, 380px)';
+  const liveQrSize = 'clamp(170px, 6.5vw, 420px)';
   const livePanelPadding = 'clamp(2rem, 2.2vw, 4rem)';
   const liveQuestionFontSize = '128px';
   const liveOptionCardWidth = '899px';
@@ -194,7 +194,7 @@ export function MainScreen({ pollId }: { pollId: string }) {
         src={backgroundImage}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="fixed inset-0 h-screen w-screen object-cover"
       />
 
       <div className="relative z-10 flex min-h-screen items-center px-8 py-10 sm:px-12 lg:px-16">
@@ -218,13 +218,13 @@ export function MainScreen({ pollId }: { pollId: string }) {
         ) : (
           <div className="mx-auto grid w-full grid-cols-12 xl:grid-cols-[minmax(300px,0.8fr)_minmax(0,2.15fr)_minmax(720px,1.38fr)] xl:items-center">
             <div
-              className="xl:justify-self-start xl:self-start"
+              className="xl:justify-self-start xl:self-start xl:-translate-x-6"
               style={{ paddingTop: 'clamp(19.5rem, 31.5vh, 31.5rem)', paddingLeft: 'clamp(1.2rem, 2.8vw, 5rem)' }}
             >
               <div className="flex flex-col items-center gap-8 xl:items-start">
                 <p
                   className="text-center font-semibold tracking-[-0.03em] xl:text-left"
-                  style={{ fontSize: 'clamp(2rem, 2.2vw, 3.3rem)', color: '#FFFFFF', lineHeight: 1.08 }}
+                  style={{ fontSize: 'clamp(2.5rem, 2.8vw, 4.1rem)', color: '#FFFFFF', lineHeight: 1.08 }}
                 >
                   <span className="block">
                     Scan the <span style={{ color: '#FF5150' }}>QR code</span>.
@@ -241,7 +241,7 @@ export function MainScreen({ pollId }: { pollId: string }) {
               </div>
             </div>
 
-            <div className="xl:justify-self-center xl:w-full">
+            <div className="xl:justify-self-start xl:w-full xl:-translate-x-16">
               {currentQuestion ? (
                 <div
                   className="mx-auto w-full"
@@ -257,7 +257,7 @@ export function MainScreen({ pollId }: { pollId: string }) {
                   </div>
 
                   <div
-                    className="mx-auto mt-20 grid grid-cols-1 gap-y-[100px] sm:grid-cols-2"
+                    className="mx-auto mt-20 grid grid-cols-1 gap-y-[60px] sm:grid-cols-2"
                     style={{ maxWidth: liveOptionGridWidth, columnGap: 'clamp(8rem, 6vw, 12rem)' }}
                   >
                     {optionBadges.map((option, index) => (

@@ -3,6 +3,11 @@ interface PieChartProps {
   options: string[];
 }
 
+const VIEWBOX_SIZE = 420;
+const CHART_CENTER = VIEWBOX_SIZE / 2;
+const PIE_RADIUS = 180;
+const LABEL_RADIUS = 90;
+
 const GRADIENTS = [
   ['#A5B9C3', '#5A889C'],
   ['#C3D0D6', '#7B9AAA'],
@@ -20,8 +25,8 @@ function segmentsCountSafe(data: { [key: string]: number }, options: string[]) {
 
 export function PieChart({ data, options }: PieChartProps) {
   const total = Object.values(data).reduce((sum, val) => sum + val, 0);
-  const chartFrameSize = 'clamp(680px, 35vw, 1260px)';
-  const solidCircleSize = 'clamp(580px, 30vw, 1080px)';
+  const chartFrameSize = 'clamp(730px, 37vw, 1300px)';
+  const solidCircleSize = 'clamp(610px, 32vw, 1120px)';
   const statsWidth = 'min(100%, 28vw)';
   const topCount = Math.max(...segmentsCountSafe(data, options));
 
@@ -46,14 +51,14 @@ export function PieChart({ data, options }: PieChartProps) {
   });
 
   const createArc = (startAngle: number, endAngle: number) => {
-    const start = polarToCartesian(210, 210, 160, endAngle);
-    const end = polarToCartesian(210, 210, 160, startAngle);
+    const start = polarToCartesian(CHART_CENTER, CHART_CENTER, PIE_RADIUS, endAngle);
+    const end = polarToCartesian(CHART_CENTER, CHART_CENTER, PIE_RADIUS, startAngle);
     const largeArc = endAngle - startAngle <= 180 ? '0' : '1';
 
     return [
-      'M', 210, 210,
+      'M', CHART_CENTER, CHART_CENTER,
       'L', start.x, start.y,
-      'A', 160, 160, 0, largeArc, 0, end.x, end.y,
+      'A', PIE_RADIUS, PIE_RADIUS, 0, largeArc, 0, end.x, end.y,
       'Z'
     ].join(' ');
   };
@@ -68,11 +73,11 @@ export function PieChart({ data, options }: PieChartProps) {
 
   const getLabelPosition = (startAngle: number, angle: number) => {
     const midAngle = startAngle + angle / 2;
-    return polarToCartesian(210, 210, 102, midAngle);
+    return polarToCartesian(CHART_CENTER, CHART_CENTER, LABEL_RADIUS, midAngle);
   };
 
   const getOptionLabel = (index: number) => {
-    return String.fromCharCode(65 + index);
+    return String.fromCharCode(97 + index);
   };
 
   const getSegmentPercentFontSize = (percentage: number) => {
@@ -95,9 +100,9 @@ export function PieChart({ data, options }: PieChartProps) {
     : undefined;
 
   return (
-    <div className="flex flex-col items-center gap-12 xl:-ml-36 xl:flex-row xl:items-center xl:justify-between xl:gap-28">
+    <div className="flex flex-col items-center gap-12 xl:-ml-64 xl:flex-row xl:items-center xl:justify-between xl:gap-44">
       <div
-        className="relative flex items-center justify-center xl:ml-6 xl:mt-24"
+        className="relative flex shrink-0 items-center justify-center xl:mt-24"
         style={{ width: chartFrameSize, height: chartFrameSize }}
       >
         {total === 0 ? (
@@ -148,7 +153,7 @@ export function PieChart({ data, options }: PieChartProps) {
           <svg
             width="100%"
             height="100%"
-            viewBox="0 0 420 420"
+            viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
             preserveAspectRatio="xMidYMid meet"
           >
             <defs>
@@ -162,7 +167,7 @@ export function PieChart({ data, options }: PieChartProps) {
                   y2="100%"
                 >
                   <stop offset="0%" stopColor={segment.isLead ? '#1652F0' : segment.gradient[0]} />
-                  <stop offset="100%" stopColor={segment.isLead ? '#4A7CFF' : segment.gradient[1]} />
+                  <stop offset="100%" stopColor={segment.isLead ? '#1652F0' : segment.gradient[1]} />
                 </linearGradient>
               ))}
             </defs>
@@ -203,7 +208,7 @@ export function PieChart({ data, options }: PieChartProps) {
       </div>
 
       <div
-        className="grid w-full grid-cols-1 gap-x-12 gap-y-6 sm:grid-cols-2 xl:mt-44 xl:pl-16"
+        className="grid w-full grid-cols-1 gap-x-12 gap-y-12 sm:grid-cols-2 xl:-translate-x-20 xl:mt-[500px]"
         style={{ maxWidth: statsWidth }}
       >
         {segments.map((segment, index) => (
@@ -219,7 +224,7 @@ export function PieChart({ data, options }: PieChartProps) {
                 className="h-6 w-6 shrink-0"
                 style={{
                   background: segment.isLead
-                    ? 'linear-gradient(135deg, #1652F0, #4A7CFF)'
+                    ? '#1652F0'
                     : `linear-gradient(135deg, ${segment.gradient[0]}, ${segment.gradient[1]})`
                 }}
               />
