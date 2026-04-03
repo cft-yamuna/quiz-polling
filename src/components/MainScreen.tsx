@@ -10,6 +10,7 @@ interface Poll {
   title: string;
   active_question_index: number;
   is_active: boolean;
+  is_display_started: boolean;
 }
 
 interface Question {
@@ -23,21 +24,17 @@ interface AnswerStats {
   [option: string]: number;
 }
 
-const INTRO_DELAY_MS = 3000;
-
 export function MainScreen({ pollId }: { pollId: string }) {
   const [poll, setPoll] = useState<Poll | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [answerStats, setAnswerStats] = useState<AnswerStats>({});
-  const [participantCount, setParticipantCount] = useState(0);
-  const [showLiveLayout, setShowLiveLayout] = useState(false);
 
   const userUrl = buildPollUrl('user', pollId);
+  const showLiveLayout = Boolean(poll?.is_display_started);
   const backgroundImage = showLiveLayout ? '/bg2.png' : '/bg.png';
 
   useEffect(() => {
     void loadPollData();
-    void loadParticipantCount();
   }, [pollId]);
 
   useEffect(() => {
@@ -51,20 +48,6 @@ export function MainScreen({ pollId }: { pollId: string }) {
     return cleanup;
   }, [pollId, currentQuestion?.id]);
 
-  useEffect(() => {
-    if (participantCount === 0 || showLiveLayout) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      setShowLiveLayout(true);
-    }, INTRO_DELAY_MS);
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [participantCount, showLiveLayout]);
-
   const loadPollData = async () => {
     const { data } = await supabase
       .from('polls')
@@ -73,15 +56,6 @@ export function MainScreen({ pollId }: { pollId: string }) {
       .maybeSingle();
 
     if (data) setPoll(data as Poll);
-  };
-
-  const loadParticipantCount = async () => {
-    const { count } = await supabase
-      .from('participants')
-      .select('*', { count: 'exact', head: true })
-      .eq('poll_id', pollId);
-
-    setParticipantCount(count || 0);
   };
 
   const loadCurrentQuestion = async () => {
@@ -122,18 +96,6 @@ export function MainScreen({ pollId }: { pollId: string }) {
       })
       .subscribe();
 
-    const participantChannel = supabase
-      .channel(`participant-updates-${pollId}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'participants',
-        filter: `poll_id=eq.${pollId}`
-      }, () => {
-        void loadParticipantCount();
-      })
-      .subscribe();
-
     const answerChannel = currentQuestionId
       ? supabase
           .channel(`answer-updates-${pollId}-${currentQuestionId}`)
@@ -150,7 +112,6 @@ export function MainScreen({ pollId }: { pollId: string }) {
 
     return () => {
       void pollChannel.unsubscribe();
-      void participantChannel.unsubscribe();
       if (answerChannel) {
         void answerChannel.unsubscribe();
       }
@@ -234,7 +195,7 @@ export function MainScreen({ pollId }: { pollId: string }) {
             </div>
 
             <div className="xl:justify-self-start xl:w-full xl:-translate-x-16">
-              {currentQuestion ? (
+              {currentQuestion && showLiveLayout ? (
                 <div
                   className="mx-auto w-full"
                   style={{ maxWidth: 'min(100%, 50vw)', padding: livePanelPadding }}
@@ -286,7 +247,7 @@ export function MainScreen({ pollId }: { pollId: string }) {
               ) : (
                 <div className="ui-panel px-6 py-8">
                   <p className="ui-title text-center text-3xl xl:text-left">
-                    Waiting for the first question...
+                    {showLiveLayout ? 'Waiting for the first question...' : 'Waiting for host to start the question screen...'}
                   </p>
                 </div>
               )}

@@ -27,7 +27,7 @@ export function PieChart({ data, options }: PieChartProps) {
   const total = Object.values(data).reduce((sum, val) => sum + val, 0);
   const chartFrameSize = 'clamp(730px, 37vw, 1300px)';
   const solidCircleSize = 'clamp(610px, 32vw, 1120px)';
-  const statsWidth = 'min(100%, 28vw)';
+  const statsWidth = 'clamp(560px, 31vw, 760px)';
   const topCount = Math.max(...segmentsCountSafe(data, options));
 
   let currentAngle = 0;
@@ -209,13 +209,18 @@ export function PieChart({ data, options }: PieChartProps) {
 
       <div
         className="grid w-full grid-cols-1 gap-x-16 gap-y-12 sm:grid-cols-2 xl:-translate-x-20 xl:mt-[500px]"
-        style={{ maxWidth: statsWidth }}
+        style={{ width: statsWidth, maxWidth: '100%' }}
       >
         {segments.map((segment, index) => (
           <div key={index} className="min-w-0">
             <p
               className="font-black leading-none tracking-[-0.06em] text-[#1652F0]"
-              style={{ fontSize: '122.29px' }}
+              style={{
+                display: 'inline-block',
+                minWidth: '4.4ch',
+                fontSize: '122.29px',
+                fontVariantNumeric: 'tabular-nums',
+              }}
             >
               {Math.round(segment.percentage)}%
             </p>

@@ -6,6 +6,7 @@ interface Poll {
   title: string;
   active_question_index: number;
   is_active: boolean;
+  is_display_started: boolean;
 }
 
 interface Question {
@@ -21,8 +22,10 @@ export function UserScreen({ pollId }: { pollId: string }) {
   const [participant, setParticipant] = useState<{ id: string; name: string } | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingImageMissing, setLoadingImageMissing] = useState(false);
   const backgroundImage = '/commonbg.png';
   const startBackgroundImage = '/mobilebg1.png';
+  const loadingImage = '/loading.png';
   const thankYouImage = '/thankyou.png';
   const participantStorageKey = `poll-participant:${pollId}`;
 
@@ -192,17 +195,61 @@ export function UserScreen({ pollId }: { pollId: string }) {
     );
   }
 
+  if (!poll.is_display_started) {
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-white">
+        {!loadingImageMissing ? (
+          <img
+            src={loadingImage}
+            alt="Loading"
+            className="absolute inset-0 h-full w-full object-cover"
+            onError={() => setLoadingImageMissing(true)}
+          />
+        ) : (
+          <img
+            src={backgroundImage}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
+
+        {loadingImageMissing && (
+          <div className="relative z-10 flex min-h-screen items-center justify-center px-6 text-center">
+            <p className="text-3xl font-semibold tracking-[-0.04em] text-white">
+              Waiting for host to start the questions...
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (!currentQuestion) {
     return (
       <div className="relative min-h-screen overflow-hidden bg-white">
-        <img
-          src={backgroundImage}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-
-        <div className="relative z-10 min-h-screen" />
+        {!loadingImageMissing ? (
+          <img
+            src={loadingImage}
+            alt="Loading"
+            className="absolute inset-0 h-full w-full object-cover"
+            onError={() => setLoadingImageMissing(true)}
+          />
+        ) : (
+          <>
+            <img
+              src={backgroundImage}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="relative z-10 flex min-h-screen items-center justify-center px-6 text-center">
+              <p className="text-3xl font-semibold tracking-[-0.04em] text-white">
+                Waiting for the next question...
+              </p>
+            </div>
+          </>
+        )}
       </div>
     );
   }

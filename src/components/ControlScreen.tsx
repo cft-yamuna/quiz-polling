@@ -9,6 +9,7 @@ interface Poll {
   title: string;
   active_question_index: number;
   is_active: boolean;
+  is_display_started: boolean;
 }
 
 interface Question {
@@ -143,6 +144,17 @@ export function ControlScreen({ pollId }: { pollId: string }) {
     setPoll(prev => prev ? { ...prev, active_question_index: prev.active_question_index + 1 } : null);
   };
 
+  const handleStartDisplay = async () => {
+    if (!poll?.is_display_started) {
+      await supabase
+        .from('polls')
+        .update({ is_display_started: true })
+        .eq('id', pollId);
+
+      setPoll((prev) => prev ? { ...prev, is_display_started: true } : null);
+    }
+  };
+
   const handlePrevious = async () => {
     if (!poll || poll.active_question_index <= 0) return;
 
@@ -234,14 +246,29 @@ export function ControlScreen({ pollId }: { pollId: string }) {
               ))}
             </div>
 
-            <button
-              onClick={handleNext}
-              disabled={poll.active_question_index >= questions.length - 1}
-              className="flex items-center gap-2 rounded-[5px] bg-slate-900 px-6 py-3 font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Next
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-3">
+              {!poll.is_display_started ? (
+                <button
+                  onClick={handleStartDisplay}
+                  className="rounded-[5px] bg-[#1652F0] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#1142c5]"
+                >
+                  Start Displaying Questions
+                </button>
+              ) : (
+                <div className="rounded-[5px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                  Question screen is live
+                </div>
+              )}
+
+              <button
+                onClick={handleNext}
+                disabled={poll.active_question_index >= questions.length - 1}
+                className="flex items-center gap-2 rounded-[5px] bg-slate-900 px-6 py-3 font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Next
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <div className="mt-8 pt-8 border-t border-gray-200">

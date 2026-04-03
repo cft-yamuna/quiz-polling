@@ -88,7 +88,7 @@ export function SetupScreen() {
 
     const { data: poll, error: pollError } = await supabase
       .from('polls')
-      .insert({ title, active_question_index: 0, is_active: true })
+      .insert({ title, active_question_index: 0, is_active: true, is_display_started: false })
       .select()
       .single();
 

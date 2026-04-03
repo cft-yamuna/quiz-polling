@@ -7,6 +7,7 @@ export interface Database {
           title: string;
           active_question_index: number;
           is_active: boolean;
+          is_display_started: boolean;
           created_at: string;
         };
         Insert: {
@@ -14,6 +15,7 @@ export interface Database {
           title: string;
           active_question_index?: number;
           is_active?: boolean;
+          is_display_started?: boolean;
           created_at?: string;
         };
         Update: {
@@ -21,6 +23,7 @@ export interface Database {
           title?: string;
           active_question_index?: number;
           is_active?: boolean;
+          is_display_started?: boolean;
           created_at?: string;
         };
         Relationships: [];
