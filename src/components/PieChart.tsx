@@ -208,13 +208,13 @@ export function PieChart({ data, options }: PieChartProps) {
       </div>
 
       <div
-        className="grid w-full grid-cols-1 gap-x-12 gap-y-12 sm:grid-cols-2 xl:-translate-x-20 xl:mt-[500px]"
+        className="grid w-full grid-cols-1 gap-x-16 gap-y-12 sm:grid-cols-2 xl:-translate-x-20 xl:mt-[500px]"
         style={{ maxWidth: statsWidth }}
       >
         {segments.map((segment, index) => (
           <div key={index} className="min-w-0">
             <p
-              className="font-black leading-none text-[#1652F0]"
+              className="font-black leading-none tracking-[-0.06em] text-[#1652F0]"
               style={{ fontSize: '122.29px' }}
             >
               {Math.round(segment.percentage)}%
@@ -230,7 +230,7 @@ export function PieChart({ data, options }: PieChartProps) {
               />
               <span
                 className="break-words font-semibold text-slate-900"
-                style={{ fontSize: '36.15px' }}
+                style={{ fontSize: '38.15px' }}
               >
                 {segment.option}
               </span>

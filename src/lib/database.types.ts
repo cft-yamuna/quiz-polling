@@ -60,6 +60,38 @@ export interface Database {
           }
         ];
       };
+      question_results: {
+        Row: {
+          question_id: string;
+          total_answers: number;
+          option_counts: Record<string, number>;
+          option_percentages: Record<string, number>;
+          updated_at: string;
+        };
+        Insert: {
+          question_id: string;
+          total_answers?: number;
+          option_counts?: Record<string, number>;
+          option_percentages?: Record<string, number>;
+          updated_at?: string;
+        };
+        Update: {
+          question_id?: string;
+          total_answers?: number;
+          option_counts?: Record<string, number>;
+          option_percentages?: Record<string, number>;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'question_results_question_id_fkey';
+            columns: ['question_id'];
+            isOneToOne: true;
+            referencedRelation: 'questions';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       participants: {
         Row: {
           id: string;

@@ -8,11 +8,41 @@ interface QuestionInput {
   options: string[];
 }
 
+const DEFAULT_POLL_TITLE = 'Team Pulse Check';
+
+const DEFAULT_QUESTIONS: QuestionInput[] = [
+  {
+    question_text: 'How satisfied are you with today\'s session?',
+    options: ['Very satisfied', 'Satisfied', 'Neutral', 'Needs improvement']
+  },
+  {
+    question_text: 'Which area should we improve next?',
+    options: ['Speed', 'Design', 'Features', 'Support']
+  },
+  {
+    question_text: 'How easy was it to join the poll?',
+    options: ['Very easy', 'Easy', 'Average', 'Difficult']
+  },
+  {
+    question_text: 'Which device are you using right now?',
+    options: ['Mobile', 'Laptop', 'Tablet', 'Desktop']
+  },
+  {
+    question_text: 'Would you join this type of poll again?',
+    options: ['Definitely', 'Maybe', 'Not sure', 'No']
+  }
+];
+
+function createDefaultQuestions() {
+  return DEFAULT_QUESTIONS.map((question) => ({
+    question_text: question.question_text,
+    options: [...question.options]
+  }));
+}
+
 export function SetupScreen() {
-  const [title, setTitle] = useState('');
-  const [questions, setQuestions] = useState<QuestionInput[]>([
-    { question_text: '', options: ['', ''] }
-  ]);
+  const [title, setTitle] = useState(DEFAULT_POLL_TITLE);
+  const [questions, setQuestions] = useState<QuestionInput[]>(createDefaultQuestions());
   const [isCreating, setIsCreating] = useState(false);
   const [createdPollId, setCreatedPollId] = useState<string | null>(null);
 
@@ -142,8 +172,8 @@ export function SetupScreen() {
           <button
             onClick={() => {
               setCreatedPollId(null);
-              setTitle('');
-              setQuestions([{ question_text: '', options: ['', ''] }]);
+              setTitle(DEFAULT_POLL_TITLE);
+              setQuestions(createDefaultQuestions());
             }}
             className="w-full rounded-[5px] border border-slate-300 bg-white py-3 font-semibold text-gray-800 transition-colors hover:bg-slate-100"
           >

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { buildPollUrl } from '../lib/app-url';
+import { fetchQuestionResults } from '../lib/question-results';
 import { ChevronLeft, ChevronRight, Users } from 'lucide-react';
 
 interface Poll {
@@ -79,12 +80,8 @@ export function ControlScreen({ pollId }: { pollId: string }) {
       return;
     }
 
-    const { count } = await supabase
-      .from('answers')
-      .select('*', { count: 'exact', head: true })
-      .eq('question_id', questionId);
-
-    setAnswerCount(count || 0);
+    const results = await fetchQuestionResults(questionId);
+    setAnswerCount(results.totalAnswers);
   };
 
   const subscribeToUpdates = (currentQuestionId?: string) => {
@@ -116,7 +113,7 @@ export function ControlScreen({ pollId }: { pollId: string }) {
       ? supabase
           .channel(`answer-count-${pollId}-${currentQuestionId}`)
           .on('postgres_changes', {
-            event: 'INSERT',
+            event: '*',
             schema: 'public',
             table: 'answers',
             filter: `question_id=eq.${currentQuestionId}`

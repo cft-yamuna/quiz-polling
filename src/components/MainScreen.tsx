@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../lib/supabase';
 import { buildPollUrl } from '../lib/app-url';
+import { fetchQuestionResults } from '../lib/question-results';
 import { PieChart } from './PieChart';
 
 interface Poll {
@@ -22,7 +23,7 @@ interface AnswerStats {
   [option: string]: number;
 }
 
-const INTRO_DELAY_MS = 5000;
+const INTRO_DELAY_MS = 3000;
 
 export function MainScreen({ pollId }: { pollId: string }) {
   const [poll, setPoll] = useState<Poll | null>(null);
@@ -104,17 +105,8 @@ export function MainScreen({ pollId }: { pollId: string }) {
   };
 
   const loadAnswerStats = async (questionId: string) => {
-    const { data: answers } = await supabase
-      .from('answers')
-      .select('answer')
-      .eq('question_id', questionId);
-
-    const stats: AnswerStats = {};
-    (answers as Array<{ answer: string }> | null)?.forEach((answer) => {
-      stats[answer.answer] = (stats[answer.answer] || 0) + 1;
-    });
-
-    setAnswerStats(stats);
+    const results = await fetchQuestionResults(questionId);
+    setAnswerStats(results.counts);
   };
 
   const subscribeToUpdates = (currentQuestionId?: string) => {
@@ -146,7 +138,7 @@ export function MainScreen({ pollId }: { pollId: string }) {
       ? supabase
           .channel(`answer-updates-${pollId}-${currentQuestionId}`)
           .on('postgres_changes', {
-            event: 'INSERT',
+            event: '*',
             schema: 'public',
             table: 'answers',
             filter: `question_id=eq.${currentQuestionId}`
