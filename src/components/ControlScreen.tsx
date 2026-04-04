@@ -235,19 +235,19 @@ export function ControlScreen() {
   const userUrl = buildPollUrl('user');
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-5xl">
-        <div className="ui-panel p-8 sm:p-10">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="ui-title text-4xl">{poll.title}</h1>
-            <div className="ui-chip px-4 py-2">
+        <div className="ui-panel p-4 sm:p-8 lg:p-10">
+          <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="ui-title text-2xl leading-tight sm:text-4xl">{poll.title}</h1>
+            <div className="ui-chip self-start px-4 py-2 sm:self-auto">
               <Users className="w-5 h-5 text-purple-600" />
               <span className="font-semibold text-purple-800">{participantCount} participants</span>
             </div>
           </div>
 
-          <div className="ui-card mb-8 p-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="ui-card mb-6 p-4 sm:mb-8 sm:p-6">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <span className="ui-chip px-4 py-2 text-sm font-medium">
                 Question {poll.active_question_index + 1} of {questions.length}
               </span>
@@ -258,16 +258,16 @@ export function ControlScreen() {
 
             {currentQuestion ? (
               <div>
-                <h2 className="ui-title mb-4 text-2xl">
+                <h2 className="ui-title mb-4 text-xl leading-tight sm:text-2xl">
                   {currentQuestion.question_text}
                 </h2>
                 <div className="space-y-2">
                   {currentQuestion.options.map((option, index) => (
-                    <div key={index} className="relative ml-5 flex min-h-[52px] items-center overflow-visible rounded-[8px] border border-slate-200 bg-white pl-10 pr-3 py-3">
-                      <div className="absolute left-0 top-1/2 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#FF5150] text-lg font-black leading-none text-white">
+                    <div key={index} className="relative ml-4 flex min-h-[48px] items-center overflow-visible rounded-[8px] border border-slate-200 bg-white pl-9 pr-3 py-2.5 sm:ml-5 sm:min-h-[52px] sm:pl-10 sm:py-3">
+                      <div className="absolute left-0 top-1/2 flex h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#FF5150] text-base font-black leading-none text-white sm:h-[52px] sm:w-[52px] sm:text-lg">
                         {String.fromCharCode(97 + index)}
                       </div>
-                      <span className="text-[1.08rem] text-gray-700">{option}</span>
+                      <span className="text-base text-gray-700 sm:text-[1.08rem]">{option}</span>
                     </div>
                   ))}
                 </div>
@@ -277,17 +277,17 @@ export function ControlScreen() {
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <button
               onClick={handlePrevious}
               disabled={poll.active_question_index === 0}
-              className="flex items-center gap-2 rounded-[5px] border border-slate-300 bg-white px-6 py-3 font-semibold transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-[5px] border border-slate-300 bg-white px-6 py-3 font-semibold transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               <ChevronLeft className="w-5 h-5" />
               Previous
             </button>
 
-            <div className="flex gap-2">
+            <div className="flex justify-center gap-2">
               {questions.map((_, index) => (
                 <div
                   key={index}
@@ -302,16 +302,16 @@ export function ControlScreen() {
               ))}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end lg:w-auto">
               {!poll.is_display_started ? (
                 <button
                   onClick={handleStartDisplay}
-                  className="rounded-[5px] bg-[#1652F0] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#1142c5]"
+                  className="w-full rounded-[5px] bg-[#1652F0] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#1142c5] sm:w-auto"
                 >
                   Start Displaying Questions
                 </button>
               ) : (
-                <div className="rounded-[5px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                <div className="rounded-[5px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-700">
                   Question screen is live
                 </div>
               )}
@@ -319,7 +319,7 @@ export function ControlScreen() {
               <button
                 onClick={handleNext}
                 disabled={poll.active_question_index >= questions.length - 1}
-                className="flex items-center gap-2 rounded-[5px] bg-slate-900 px-6 py-3 font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-[5px] bg-slate-900 px-6 py-3 font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 Next
                 <ChevronRight className="w-5 h-5" />
@@ -327,18 +327,18 @@ export function ControlScreen() {
             </div>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-gray-200">
+          <div className="mt-6 border-t border-gray-200 pt-6 sm:mt-8 sm:pt-8">
             <h3 className="font-semibold text-gray-700 mb-4">Control Panel URLs:</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2">
                 <span className="font-medium text-gray-600">Main Screen:</span>
-                <code className="rounded-[5px] bg-gray-100 px-2 py-1 text-gray-800">
+                <code className="block w-full overflow-x-auto rounded-[5px] bg-gray-100 px-2 py-1 text-xs text-gray-800 sm:w-auto sm:text-sm">
                   {mainUrl}
                 </code>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2">
                 <span className="font-medium text-gray-600">User Screen:</span>
-                <code className="rounded-[5px] bg-gray-100 px-2 py-1 text-gray-800">
+                <code className="block w-full overflow-x-auto rounded-[5px] bg-gray-100 px-2 py-1 text-xs text-gray-800 sm:w-auto sm:text-sm">
                   {userUrl}
                 </code>
               </div>
