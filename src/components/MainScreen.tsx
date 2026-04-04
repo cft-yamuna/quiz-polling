@@ -252,7 +252,9 @@ export function MainScreen() {
                     {optionBadges.map((option, index) => (
                       <div
                         key={`${option.key}-${index}`}
-                        className="ui-card relative flex items-center overflow-visible pr-6 py-5"
+                        className={`ui-card relative flex items-center overflow-visible pr-6 py-5 ${
+                          optionBadges.length === 3 && index === 2 ? 'sm:col-span-2 sm:justify-self-center' : ''
+                        }`}
                         style={{
                           marginLeft: liveOptionBadgeOffset,
                           width: liveOptionCardWidth,

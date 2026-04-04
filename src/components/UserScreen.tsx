@@ -340,7 +340,9 @@ export function UserScreen() {
                 key={`${option.key}-${index}`}
                 onClick={() => handleAnswer(option.text)}
                 disabled={isSubmitting}
-                className="relative h-[64px] w-full max-w-[228px] text-left transition-opacity disabled:opacity-60"
+                className={`relative h-[64px] w-full max-w-[228px] text-left transition-opacity disabled:opacity-60 ${
+                  optionBadges.length === 3 && index === 2 ? 'min-[500px]:col-span-2 min-[500px]:justify-self-center' : ''
+                }`}
               >
                 <div className="absolute inset-y-0 left-0 z-10 flex w-[64px] items-center justify-center rounded-full bg-[#FF5150] text-[1.18rem] font-black leading-none text-white sm:text-[1.28rem]">
                   {option.label}
