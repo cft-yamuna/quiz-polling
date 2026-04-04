@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { buildPollUrl } from '../lib/app-url';
 import { fetchQuestionResults } from '../lib/question-results';
@@ -25,6 +25,10 @@ export function ControlScreen() {
   const [participantCount, setParticipantCount] = useState(0);
   const [answerCount, setAnswerCount] = useState(0);
   const [isLoadingPoll, setIsLoadingPoll] = useState(true);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [pendingDirection, setPendingDirection] = useState<'next' | 'previous' | null>(null);
+  const [isQuestionTransitioning, setIsQuestionTransitioning] = useState(false);
+  const navigationLockRef = useRef(false);
 
   useEffect(() => {
     void loadLatestPoll();
@@ -55,6 +59,17 @@ export function ControlScreen() {
     const cleanup = subscribeToUpdates(poll?.id, getCurrentQuestionId());
     return cleanup;
   }, [poll?.id, poll?.active_question_index, questions]);
+
+  useEffect(() => {
+    if (!poll) return;
+
+    setIsQuestionTransitioning(true);
+    const timer = window.setTimeout(() => {
+      setIsQuestionTransitioning(false);
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [poll?.active_question_index, poll?.id]);
 
   const loadLatestPoll = async () => {
     const { data } = await supabase
@@ -181,15 +196,38 @@ export function ControlScreen() {
     };
   };
 
-  const handleNext = async () => {
-    if (!poll || poll.active_question_index >= questions.length - 1) return;
+  const navigateQuestion = async (direction: 'next' | 'previous') => {
+    if (!poll || navigationLockRef.current) return;
 
-    await supabase
+    const currentIndex = poll.active_question_index;
+    const nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+    if (nextIndex < 0 || nextIndex > questions.length - 1) return;
+
+    navigationLockRef.current = true;
+    setIsNavigating(true);
+    setPendingDirection(direction);
+    setPoll(prev => prev ? { ...prev, active_question_index: nextIndex } : null);
+
+    const { data, error } = await supabase
       .from('polls')
-      .update({ active_question_index: poll.active_question_index + 1 })
-      .eq('id', poll.id);
+      .update({ active_question_index: nextIndex })
+      .eq('id', poll.id)
+      .eq('active_question_index', currentIndex)
+      .select('id')
+      .maybeSingle();
 
-    setPoll(prev => prev ? { ...prev, active_question_index: prev.active_question_index + 1 } : null);
+    if (error || !data) {
+      setPoll(prev => prev ? { ...prev, active_question_index: currentIndex } : null);
+      void loadLatestPoll();
+    }
+
+    navigationLockRef.current = false;
+    setIsNavigating(false);
+    setPendingDirection(null);
+  };
+
+  const handleNext = async () => {
+    await navigateQuestion('next');
   };
 
   const handleStartDisplay = async () => {
@@ -204,14 +242,7 @@ export function ControlScreen() {
   };
 
   const handlePrevious = async () => {
-    if (!poll || poll.active_question_index <= 0) return;
-
-    await supabase
-      .from('polls')
-      .update({ active_question_index: poll.active_question_index - 1 })
-      .eq('id', poll.id);
-
-    setPoll(prev => prev ? { ...prev, active_question_index: prev.active_question_index - 1 } : null);
+    await navigateQuestion('previous');
   };
 
   if (isLoadingPoll) {
@@ -257,7 +288,7 @@ export function ControlScreen() {
             </div>
 
             {currentQuestion ? (
-              <div>
+              <div className={`transition-all duration-200 ease-out ${isQuestionTransitioning ? 'translate-y-[2px] opacity-90' : 'translate-y-0 opacity-100'}`}>
                 <h2 className="ui-title mb-4 text-xl leading-tight sm:text-2xl">
                   {currentQuestion.question_text}
                 </h2>
@@ -280,11 +311,11 @@ export function ControlScreen() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <button
               onClick={handlePrevious}
-              disabled={poll.active_question_index === 0}
+              disabled={poll.active_question_index === 0 || isNavigating}
               className="flex w-full items-center justify-center gap-2 rounded-[5px] border border-slate-300 bg-white px-6 py-3 font-semibold transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               <ChevronLeft className="w-5 h-5" />
-              Previous
+              {pendingDirection === 'previous' ? 'Updating...' : 'Previous'}
             </button>
 
             <div className="flex justify-center gap-2">
@@ -318,10 +349,10 @@ export function ControlScreen() {
 
               <button
                 onClick={handleNext}
-                disabled={poll.active_question_index >= questions.length - 1}
+                disabled={poll.active_question_index >= questions.length - 1 || isNavigating}
                 className="flex w-full items-center justify-center gap-2 rounded-[5px] bg-slate-900 px-6 py-3 font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
-                Next
+                {pendingDirection === 'next' ? 'Updating...' : 'Next'}
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
