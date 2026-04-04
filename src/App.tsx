@@ -1,41 +1,29 @@
-import { useEffect, useState } from 'react';
 import { SetupScreen } from './components/SetupScreen';
 import { MainScreen } from './components/MainScreen';
 import { UserScreen } from './components/UserScreen';
 import { ControlScreen } from './components/ControlScreen';
 
-type Route = 'setup' | 'main' | 'user' | 'control';
-
 function App() {
-  const [route, setRoute] = useState<Route>('setup');
-  const [pollId, setPollId] = useState<string>('');
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  const [firstSegment] = path.split('/').filter(Boolean);
 
-  useEffect(() => {
-    const path = window.location.pathname;
-    const segments = path.split('/').filter(Boolean);
-
-    if (segments.length >= 2) {
-      const [routeName, id] = segments;
-      if (routeName === 'main' || routeName === 'user' || routeName === 'control') {
-        setRoute(routeName as Route);
-        setPollId(id);
-      }
-    }
-  }, []);
-
-  if (route === 'main' && pollId) {
-    return <MainScreen pollId={pollId} />;
+  if (firstSegment === 'main') {
+    return <MainScreen />;
   }
 
-  if (route === 'user' && pollId) {
-    return <UserScreen pollId={pollId} />;
+  if (firstSegment === 'user') {
+    return <UserScreen />;
   }
 
-  if (route === 'control' && pollId) {
-    return <ControlScreen pollId={pollId} />;
+  if (firstSegment === 'control') {
+    return <ControlScreen />;
   }
 
-  return <SetupScreen />;
+  if (firstSegment === 'create') {
+    return <SetupScreen />;
+  }
+
+  return <div className="min-h-screen bg-black" />;
 }
 
 export default App;

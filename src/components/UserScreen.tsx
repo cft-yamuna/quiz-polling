@@ -16,40 +16,69 @@ interface Question {
   order_index: number;
 }
 
-export function UserScreen({ pollId }: { pollId: string }) {
+export function UserScreen() {
   const [poll, setPoll] = useState<Poll | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [participant, setParticipant] = useState<{ id: string; name: string } | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingPoll, setIsLoadingPoll] = useState(true);
   const [loadingImageMissing, setLoadingImageMissing] = useState(false);
   const backgroundImage = '/commonbg.png';
   const startBackgroundImage = '/mobilebg1.png';
   const loadingImage = '/loading.png';
   const thankYouImage = '/thankyou.png';
-  const participantStorageKey = `poll-participant:${pollId}`;
 
   useEffect(() => {
-    void loadPollData();
-    const cleanup = subscribeToUpdates();
+    void loadLatestPoll();
+  }, []);
+
+  useEffect(() => {
+    const cleanup = subscribeToUpdates(poll?.id);
     return cleanup;
-  }, [pollId]);
+  }, [poll?.id]);
 
   useEffect(() => {
     if (poll && participant) {
       void loadCurrentQuestion();
       setHasAnswered(false);
+      return;
     }
-  }, [poll?.active_question_index, participant]);
 
-  const loadPollData = async () => {
+    setCurrentQuestion(null);
+    setHasAnswered(false);
+  }, [poll?.id, poll?.active_question_index, participant]);
+
+  const getParticipantStorageKey = (pollId: string) => {
+    return `poll-participant:${pollId}`;
+  };
+
+  const loadLatestPoll = async () => {
     const { data } = await supabase
       .from('polls')
       .select('*')
-      .eq('id', pollId)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
-    if (data) setPoll(data as Poll);
+    if (data) {
+      const latestPoll = data as Poll;
+
+      if (poll?.id && poll.id !== latestPoll.id) {
+        setParticipant(null);
+        setCurrentQuestion(null);
+        setHasAnswered(false);
+      }
+
+      setPoll(latestPoll);
+    } else {
+      setPoll(null);
+      setParticipant(null);
+      setCurrentQuestion(null);
+      setHasAnswered(false);
+    }
+
+    setIsLoadingPoll(false);
   };
 
   const loadCurrentQuestion = async () => {
@@ -58,7 +87,7 @@ export function UserScreen({ pollId }: { pollId: string }) {
     const { data: questions } = await supabase
       .from('questions')
       .select('*')
-      .eq('poll_id', pollId)
+      .eq('poll_id', poll.id)
       .order('order_index');
 
     if (questions && questions[poll.active_question_index]) {
@@ -75,30 +104,53 @@ export function UserScreen({ pollId }: { pollId: string }) {
 
         setHasAnswered(!!existingAnswer);
       }
+      return;
     }
+
+    setCurrentQuestion(null);
+    setHasAnswered(false);
   };
 
-  const subscribeToUpdates = () => {
-    const channel = supabase
-      .channel(`poll-updates-user-${pollId}`)
+  const subscribeToUpdates = (pollId?: string) => {
+    const latestPollChannel = supabase
+      .channel('latest-poll-user')
       .on('postgres_changes', {
-        event: 'UPDATE',
+        event: 'INSERT',
         schema: 'public',
-        table: 'polls',
-        filter: `id=eq.${pollId}`
-      }, (payload) => {
-        setPoll(payload.new as Poll);
+        table: 'polls'
+      }, () => {
+        void loadLatestPoll();
       })
       .subscribe();
 
+    const pollChannel = pollId
+      ? supabase
+          .channel(`poll-updates-user-${pollId}`)
+          .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'polls',
+            filter: `id=eq.${pollId}`
+          }, (payload) => {
+            setPoll(payload.new as Poll);
+          })
+          .subscribe()
+      : null;
+
     return () => {
-      void channel.unsubscribe();
+      void latestPollChannel.unsubscribe();
+      if (pollChannel) {
+        void pollChannel.unsubscribe();
+      }
     };
   };
 
   const handleStart = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!poll) return;
+
+    const participantStorageKey = getParticipantStorageKey(poll.id);
     const storedParticipant = window.localStorage.getItem(participantStorageKey);
     if (storedParticipant) {
       try {
@@ -114,7 +166,7 @@ export function UserScreen({ pollId }: { pollId: string }) {
     const generatedName = `Participant ${Math.floor(1000 + Math.random() * 9000)}`;
     const { data, error } = await supabase
       .from('participants')
-      .insert({ poll_id: pollId, name: generatedName })
+      .insert({ poll_id: poll.id, name: generatedName })
       .select()
       .single();
 
@@ -151,10 +203,18 @@ export function UserScreen({ pollId }: { pollId: string }) {
     text: option
   })) ?? [];
 
-  if (!poll) {
+  if (isLoadingPoll) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-2xl text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!poll) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-2xl text-gray-600">No poll found. Create one at /create.</p>
       </div>
     );
   }

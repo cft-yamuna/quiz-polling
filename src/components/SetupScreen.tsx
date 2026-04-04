@@ -44,7 +44,7 @@ export function SetupScreen() {
   const [title, setTitle] = useState(DEFAULT_POLL_TITLE);
   const [questions, setQuestions] = useState<QuestionInput[]>(createDefaultQuestions());
   const [isCreating, setIsCreating] = useState(false);
-  const [createdPollId, setCreatedPollId] = useState<string | null>(null);
+  const [isCreated, setIsCreated] = useState(false);
 
   const addQuestion = () => {
     setQuestions([...questions, { question_text: '', options: ['', ''] }]);
@@ -117,14 +117,14 @@ export function SetupScreen() {
       return;
     }
 
-    setCreatedPollId(createdPoll.id);
+    setIsCreated(true);
     setIsCreating(false);
   };
 
-  if (createdPollId) {
-    const mainUrl = buildPollUrl('main', createdPollId);
-    const userUrl = buildPollUrl('user', createdPollId);
-    const controlUrl = buildPollUrl('control', createdPollId);
+  if (isCreated) {
+    const mainUrl = buildPollUrl('main');
+    const userUrl = buildPollUrl('user');
+    const controlUrl = buildPollUrl('control');
 
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
@@ -171,7 +171,7 @@ export function SetupScreen() {
 
           <button
             onClick={() => {
-              setCreatedPollId(null);
+              setIsCreated(false);
               setTitle(DEFAULT_POLL_TITLE);
               setQuestions(createDefaultQuestions());
             }}

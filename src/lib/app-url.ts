@@ -8,6 +8,6 @@ export function getAppBaseUrl() {
   return window.location.origin.replace(/\/$/, '');
 }
 
-export function buildPollUrl(route: 'main' | 'user' | 'control', pollId: string) {
-  return `${getAppBaseUrl()}/${route}/${pollId}`;
+export function buildPollUrl(route: 'main' | 'user' | 'control') {
+  return `${getAppBaseUrl()}/${route}`;
 }

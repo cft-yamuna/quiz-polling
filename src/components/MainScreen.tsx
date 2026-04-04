@@ -24,38 +24,52 @@ interface AnswerStats {
   [option: string]: number;
 }
 
-export function MainScreen({ pollId }: { pollId: string }) {
+export function MainScreen() {
   const [poll, setPoll] = useState<Poll | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [answerStats, setAnswerStats] = useState<AnswerStats>({});
+  const [isLoadingPoll, setIsLoadingPoll] = useState(true);
 
-  const userUrl = buildPollUrl('user', pollId);
+  const userUrl = buildPollUrl('user');
   const showLiveLayout = Boolean(poll?.is_display_started);
   const backgroundImage = showLiveLayout ? '/bg2.png' : '/bg.png';
 
   useEffect(() => {
-    void loadPollData();
-  }, [pollId]);
+    void loadLatestPoll();
+  }, []);
 
   useEffect(() => {
     if (poll) {
       void loadCurrentQuestion();
+      return;
     }
-  }, [pollId, poll?.active_question_index]);
+
+    setCurrentQuestion(null);
+    setAnswerStats({});
+  }, [poll?.id, poll?.active_question_index]);
 
   useEffect(() => {
-    const cleanup = subscribeToUpdates(currentQuestion?.id);
+    const cleanup = subscribeToUpdates(poll?.id, currentQuestion?.id);
     return cleanup;
-  }, [pollId, currentQuestion?.id]);
+  }, [poll?.id, currentQuestion?.id]);
 
-  const loadPollData = async () => {
+  const loadLatestPoll = async () => {
     const { data } = await supabase
       .from('polls')
       .select('*')
-      .eq('id', pollId)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
-    if (data) setPoll(data as Poll);
+    if (data) {
+      setPoll(data as Poll);
+    } else {
+      setPoll(null);
+      setCurrentQuestion(null);
+      setAnswerStats({});
+    }
+
+    setIsLoadingPoll(false);
   };
 
   const loadCurrentQuestion = async () => {
@@ -64,7 +78,7 @@ export function MainScreen({ pollId }: { pollId: string }) {
     const { data: questions } = await supabase
       .from('questions')
       .select('*')
-      .eq('poll_id', pollId)
+      .eq('poll_id', poll.id)
       .order('order_index');
 
     if (questions && questions[poll.active_question_index]) {
@@ -83,22 +97,35 @@ export function MainScreen({ pollId }: { pollId: string }) {
     setAnswerStats(results.counts);
   };
 
-  const subscribeToUpdates = (currentQuestionId?: string) => {
-    const pollChannel = supabase
-      .channel(`poll-updates-${pollId}`)
+  const subscribeToUpdates = (pollId?: string, currentQuestionId?: string) => {
+    const latestPollChannel = supabase
+      .channel('latest-poll-main')
       .on('postgres_changes', {
-        event: 'UPDATE',
+        event: 'INSERT',
         schema: 'public',
-        table: 'polls',
-        filter: `id=eq.${pollId}`
-      }, (payload) => {
-        setPoll(payload.new as Poll);
+        table: 'polls'
+      }, () => {
+        void loadLatestPoll();
       })
       .subscribe();
 
+    const pollChannel = pollId
+      ? supabase
+          .channel(`poll-updates-${pollId}`)
+          .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'polls',
+            filter: `id=eq.${pollId}`
+          }, (payload) => {
+            setPoll(payload.new as Poll);
+          })
+          .subscribe()
+      : null;
+
     const answerChannel = currentQuestionId
       ? supabase
-          .channel(`answer-updates-${pollId}-${currentQuestionId}`)
+          .channel(`answer-updates-${currentQuestionId}`)
           .on('postgres_changes', {
             event: '*',
             schema: 'public',
@@ -111,16 +138,25 @@ export function MainScreen({ pollId }: { pollId: string }) {
       : null;
 
     return () => {
-      void pollChannel.unsubscribe();
+      void latestPollChannel.unsubscribe();
+      if (pollChannel) {
+        void pollChannel.unsubscribe();
+      }
       if (answerChannel) {
         void answerChannel.unsubscribe();
       }
     };
   };
 
-  if (!poll) {
+  if (isLoadingPoll) {
     return <div className="min-h-screen bg-white flex items-center justify-center">
       <p className="text-2xl text-gray-600">Loading...</p>
+    </div>;
+  }
+
+  if (!poll) {
+    return <div className="min-h-screen bg-white flex items-center justify-center">
+      <p className="text-2xl text-gray-600">No poll found. Create one at /create.</p>
     </div>;
   }
 

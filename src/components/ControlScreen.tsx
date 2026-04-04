@@ -19,54 +19,82 @@ interface Question {
   order_index: number;
 }
 
-export function ControlScreen({ pollId }: { pollId: string }) {
+export function ControlScreen() {
   const [poll, setPoll] = useState<Poll | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [participantCount, setParticipantCount] = useState(0);
   const [answerCount, setAnswerCount] = useState(0);
+  const [isLoadingPoll, setIsLoadingPoll] = useState(true);
 
   useEffect(() => {
-    void loadPollData();
+    void loadLatestPoll();
+  }, []);
+
+  useEffect(() => {
+    if (!poll) {
+      setQuestions([]);
+      setParticipantCount(0);
+      setAnswerCount(0);
+      return;
+    }
+
     void loadQuestions();
     void loadParticipantCount();
-  }, [pollId]);
+  }, [poll?.id]);
 
   useEffect(() => {
     if (poll && questions.length > 0) {
       void loadAnswerCount();
+      return;
     }
-  }, [poll?.active_question_index, questions]);
+
+    setAnswerCount(0);
+  }, [poll?.id, poll?.active_question_index, questions]);
 
   useEffect(() => {
-    const cleanup = subscribeToUpdates(getCurrentQuestionId());
+    const cleanup = subscribeToUpdates(poll?.id, getCurrentQuestionId());
     return cleanup;
-  }, [pollId, poll?.active_question_index, questions]);
+  }, [poll?.id, poll?.active_question_index, questions]);
 
-  const loadPollData = async () => {
+  const loadLatestPoll = async () => {
     const { data } = await supabase
       .from('polls')
       .select('*')
-      .eq('id', pollId)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
-    if (data) setPoll(data as Poll);
+    if (data) {
+      setPoll(data as Poll);
+    } else {
+      setPoll(null);
+      setQuestions([]);
+      setParticipantCount(0);
+      setAnswerCount(0);
+    }
+
+    setIsLoadingPoll(false);
   };
 
   const loadQuestions = async () => {
+    if (!poll) return;
+
     const { data } = await supabase
       .from('questions')
       .select('*')
-      .eq('poll_id', pollId)
+      .eq('poll_id', poll.id)
       .order('order_index');
 
     if (data) setQuestions(data as Question[]);
   };
 
   const loadParticipantCount = async () => {
+    if (!poll) return;
+
     const { count } = await supabase
       .from('participants')
       .select('*', { count: 'exact', head: true })
-      .eq('poll_id', pollId);
+      .eq('poll_id', poll.id);
 
     setParticipantCount(count || 0);
   };
@@ -85,34 +113,49 @@ export function ControlScreen({ pollId }: { pollId: string }) {
     setAnswerCount(results.totalAnswers);
   };
 
-  const subscribeToUpdates = (currentQuestionId?: string) => {
-    const pollChannel = supabase
-      .channel(`control-poll-updates-${pollId}`)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'polls',
-        filter: `id=eq.${pollId}`
-      }, (payload) => {
-        setPoll(payload.new as Poll);
-      })
-      .subscribe();
-
-    const participantChannel = supabase
-      .channel(`participant-count-${pollId}`)
+  const subscribeToUpdates = (pollId?: string, currentQuestionId?: string) => {
+    const latestPollChannel = supabase
+      .channel('latest-poll-control')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
-        table: 'participants',
-        filter: `poll_id=eq.${pollId}`
+        table: 'polls'
       }, () => {
-        void loadParticipantCount();
+        void loadLatestPoll();
       })
       .subscribe();
 
+    const pollChannel = pollId
+      ? supabase
+          .channel(`control-poll-updates-${pollId}`)
+          .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'polls',
+            filter: `id=eq.${pollId}`
+          }, (payload) => {
+            setPoll(payload.new as Poll);
+          })
+          .subscribe()
+      : null;
+
+    const participantChannel = pollId
+      ? supabase
+          .channel(`participant-count-${pollId}`)
+          .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'participants',
+            filter: `poll_id=eq.${pollId}`
+          }, () => {
+            void loadParticipantCount();
+          })
+          .subscribe()
+      : null;
+
     const answerChannel = currentQuestionId
       ? supabase
-          .channel(`answer-count-${pollId}-${currentQuestionId}`)
+          .channel(`answer-count-${currentQuestionId}`)
           .on('postgres_changes', {
             event: '*',
             schema: 'public',
@@ -125,8 +168,13 @@ export function ControlScreen({ pollId }: { pollId: string }) {
       : null;
 
     return () => {
-      void pollChannel.unsubscribe();
-      void participantChannel.unsubscribe();
+      void latestPollChannel.unsubscribe();
+      if (pollChannel) {
+        void pollChannel.unsubscribe();
+      }
+      if (participantChannel) {
+        void participantChannel.unsubscribe();
+      }
       if (answerChannel) {
         void answerChannel.unsubscribe();
       }
@@ -139,7 +187,7 @@ export function ControlScreen({ pollId }: { pollId: string }) {
     await supabase
       .from('polls')
       .update({ active_question_index: poll.active_question_index + 1 })
-      .eq('id', pollId);
+      .eq('id', poll.id);
 
     setPoll(prev => prev ? { ...prev, active_question_index: prev.active_question_index + 1 } : null);
   };
@@ -149,7 +197,7 @@ export function ControlScreen({ pollId }: { pollId: string }) {
       await supabase
         .from('polls')
         .update({ is_display_started: true })
-        .eq('id', pollId);
+        .eq('id', poll.id);
 
       setPoll((prev) => prev ? { ...prev, is_display_started: true } : null);
     }
@@ -161,22 +209,30 @@ export function ControlScreen({ pollId }: { pollId: string }) {
     await supabase
       .from('polls')
       .update({ active_question_index: poll.active_question_index - 1 })
-      .eq('id', pollId);
+      .eq('id', poll.id);
 
     setPoll(prev => prev ? { ...prev, active_question_index: prev.active_question_index - 1 } : null);
   };
 
-  if (!poll) {
+  if (isLoadingPoll) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <p className="text-2xl text-gray-600">Loading...</p>
       </div>
     );
   }
 
+  if (!poll) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-2xl text-gray-600">No poll found. Create one at /create.</p>
+      </div>
+    );
+  }
+
   const currentQuestion = questions[poll.active_question_index];
-  const mainUrl = buildPollUrl('main', pollId);
-  const userUrl = buildPollUrl('user', pollId);
+  const mainUrl = buildPollUrl('main');
+  const userUrl = buildPollUrl('user');
 
   return (
     <div className="min-h-screen bg-slate-50 p-8">
