@@ -25,9 +25,9 @@ function segmentsCountSafe(data: { [key: string]: number }, options: string[]) {
 
 export function PieChart({ data, options }: PieChartProps) {
   const total = Object.values(data).reduce((sum, val) => sum + val, 0);
-  const chartFrameSize = 'clamp(730px, 37vw, 1300px)';
-  const solidCircleSize = 'clamp(610px, 32vw, 1120px)';
-  const statsWidth = 'clamp(560px, 31vw, 760px)';
+  const chartFrameSize = 'clamp(170px, 16vw, 340px)';
+  const solidCircleSize = 'clamp(150px, 14vw, 300px)';
+  const statsWidth = 'clamp(190px, 13vw, 340px)';
   const topCount = Math.max(...segmentsCountSafe(data, options));
 
   let currentAngle = 0;
@@ -100,26 +100,26 @@ export function PieChart({ data, options }: PieChartProps) {
     : undefined;
 
   return (
-    <div className="flex flex-col items-center gap-12 xl:-ml-64 xl:flex-row xl:items-center xl:justify-between xl:gap-44">
+    <div className="flex items-center gap-4 xl:gap-8">
       <div
-        className="relative flex shrink-0 items-center justify-center xl:mt-24"
+        className="relative flex shrink-0 items-center justify-center"
         style={{ width: chartFrameSize, height: chartFrameSize }}
       >
         {total === 0 ? (
           <div
-            className="flex items-center justify-center rounded-full border-[20px] border-[#dfe4ea] text-center"
+            className="flex items-center justify-center rounded-full border-[8px] border-[#d0d6df] text-center"
             style={{ width: solidCircleSize, height: solidCircleSize }}
           >
             <div>
               <p
                 className="font-black text-[#1652F0]"
-                style={{ fontSize: '122.29px' }}
+                style={{ fontSize: 'clamp(28px, 2.8vw, 56px)' }}
               >
                 0%
               </p>
               <p
-                className="mt-3 font-semibold uppercase tracking-[0.2em] text-slate-500"
-                style={{ fontSize: '36.15px' }}
+                className="mt-1 font-semibold uppercase tracking-[0.2em] text-slate-500"
+                style={{ fontSize: 'clamp(6px, 0.52vw, 12px)' }}
               >
                 Waiting for responses
               </p>
@@ -137,13 +137,13 @@ export function PieChart({ data, options }: PieChartProps) {
             <div className="relative z-10 text-center text-white">
               <p
                 className="font-black leading-none"
-                style={{ fontSize: '122.29px' }}
+                style={{ fontSize: 'clamp(28px, 2.8vw, 56px)' }}
               >
                 100%
               </p>
               <p
-                className="mt-4 font-semibold"
-                style={{ fontSize: '36.15px' }}
+                className="mt-2 font-semibold"
+                style={{ fontSize: 'clamp(9px, 0.8vw, 18px)' }}
               >
                 {dominantSegment.option}
               </p>
@@ -208,7 +208,7 @@ export function PieChart({ data, options }: PieChartProps) {
       </div>
 
       <div
-        className="grid w-full grid-cols-1 gap-x-16 gap-y-12 sm:grid-cols-2 xl:-translate-x-20 xl:mt-[500px]"
+        className="grid w-full grid-cols-2 gap-x-2 gap-y-2"
         style={{ width: statsWidth, maxWidth: '100%' }}
       >
         {segments.map((segment, index) => (
@@ -217,16 +217,16 @@ export function PieChart({ data, options }: PieChartProps) {
               className="font-black leading-none tracking-[-0.06em] text-[#1652F0]"
               style={{
                 display: 'inline-block',
-                minWidth: '4.4ch',
-                fontSize: '122.29px',
+                minWidth: '3.1ch',
+                fontSize: 'clamp(20px, 2vw, 46px)',
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
               {Math.round(segment.percentage)}%
             </p>
-            <div className="mt-2 flex items-center gap-3">
+            <div className="mt-0.5 flex items-center gap-1.5">
               <div
-                className="h-6 w-6 shrink-0"
+                className="h-2.5 w-2.5 shrink-0"
                 style={{
                   background: segment.isLead
                     ? '#1652F0'
@@ -235,7 +235,7 @@ export function PieChart({ data, options }: PieChartProps) {
               />
               <span
                 className="break-words font-semibold text-slate-900"
-                style={{ fontSize: '38.15px' }}
+                style={{ fontSize: 'clamp(9px, 0.75vw, 16px)' }}
               >
                 {segment.option}
               </span>
