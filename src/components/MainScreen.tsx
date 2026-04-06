@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../lib/supabase';
 import { buildPollUrl } from '../lib/app-url';
@@ -24,11 +24,25 @@ interface AnswerStats {
   [option: string]: number;
 }
 
+function areAnswerStatsEqual(a: AnswerStats, b: AnswerStats) {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+
+  if (aKeys.length !== bKeys.length) {
+    return false;
+  }
+
+  return aKeys.every((key) => a[key] === b[key]);
+}
+
 export function MainScreen() {
   const [poll, setPoll] = useState<Poll | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [answerStats, setAnswerStats] = useState<AnswerStats>({});
   const [isLoadingPoll, setIsLoadingPoll] = useState(true);
+  const answerLoadRequestRef = useRef(0);
+  const activeQuestionIdRef = useRef<string | undefined>(undefined);
+  const answerRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const userUrl = buildPollUrl('user');
   const showLiveLayout = Boolean(poll?.is_display_started);
@@ -46,12 +60,22 @@ export function MainScreen() {
 
     setCurrentQuestion(null);
     setAnswerStats({});
+    activeQuestionIdRef.current = undefined;
   }, [poll?.id, poll?.active_question_index]);
 
   useEffect(() => {
     const cleanup = subscribeToUpdates(poll?.id, currentQuestion?.id);
     return cleanup;
   }, [poll?.id, currentQuestion?.id]);
+
+  useEffect(() => {
+    return () => {
+      if (answerRefreshTimerRef.current) {
+        clearTimeout(answerRefreshTimerRef.current);
+        answerRefreshTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const loadLatestPoll = async () => {
     const { data } = await supabase
@@ -67,10 +91,43 @@ export function MainScreen() {
       setPoll(null);
       setCurrentQuestion(null);
       setAnswerStats({});
+      activeQuestionIdRef.current = undefined;
     }
 
     setIsLoadingPoll(false);
   };
+
+  const applyAnswerStats = useCallback((nextCounts: AnswerStats) => {
+    setAnswerStats((previous) => (
+      areAnswerStatsEqual(previous, nextCounts) ? previous : nextCounts
+    ));
+  }, []);
+
+  const loadAnswerStats = useCallback(async (questionId: string) => {
+    const requestId = ++answerLoadRequestRef.current;
+    const results = await fetchQuestionResults(questionId);
+
+    if (requestId !== answerLoadRequestRef.current) {
+      return;
+    }
+
+    if (activeQuestionIdRef.current !== questionId) {
+      return;
+    }
+
+    applyAnswerStats(results.counts);
+  }, [applyAnswerStats]);
+
+  const scheduleAnswerStatsRefresh = useCallback((questionId: string) => {
+    if (answerRefreshTimerRef.current) {
+      return;
+    }
+
+    answerRefreshTimerRef.current = setTimeout(() => {
+      answerRefreshTimerRef.current = null;
+      void loadAnswerStats(questionId);
+    }, 160);
+  }, [loadAnswerStats]);
 
   const loadCurrentQuestion = async () => {
     if (!poll) return;
@@ -84,20 +141,17 @@ export function MainScreen() {
     if (questions && questions[poll.active_question_index]) {
       const question = questions[poll.active_question_index] as Question;
       setCurrentQuestion(question);
+      activeQuestionIdRef.current = question.id;
       await loadAnswerStats(question.id);
       return;
     }
 
     setCurrentQuestion(null);
+    activeQuestionIdRef.current = undefined;
     setAnswerStats({});
   };
 
-  const loadAnswerStats = async (questionId: string) => {
-    const results = await fetchQuestionResults(questionId);
-    setAnswerStats(results.counts);
-  };
-
-  const subscribeToUpdates = (pollId?: string, currentQuestionId?: string) => {
+  const subscribeToUpdates = useCallback((pollId?: string, currentQuestionId?: string) => {
     const latestPollChannel = supabase
       .channel('latest-poll-main')
       .on('postgres_changes', {
@@ -132,12 +186,16 @@ export function MainScreen() {
             table: 'answers',
             filter: `question_id=eq.${currentQuestionId}`
           }, () => {
-            void loadAnswerStats(currentQuestionId);
+            scheduleAnswerStatsRefresh(currentQuestionId);
           })
           .subscribe()
       : null;
 
     return () => {
+      if (answerRefreshTimerRef.current) {
+        clearTimeout(answerRefreshTimerRef.current);
+        answerRefreshTimerRef.current = null;
+      }
       void latestPollChannel.unsubscribe();
       if (pollChannel) {
         void pollChannel.unsubscribe();
@@ -146,7 +204,7 @@ export function MainScreen() {
         void answerChannel.unsubscribe();
       }
     };
-  };
+  }, [scheduleAnswerStatsRefresh]);
 
   if (isLoadingPoll) {
     return <div className="min-h-screen bg-white flex items-center justify-center">

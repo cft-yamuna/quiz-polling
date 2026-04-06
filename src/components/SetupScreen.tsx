@@ -12,52 +12,48 @@ const DEFAULT_POLL_TITLE = 'Team Pulse Check';
 
 const DEFAULT_QUESTIONS: QuestionInput[] = [
   {
-    question_text: 'What came first in HP, the PC or the Printer?',
-    options: ['PC', 'Printer', 'Neither', 'A real chicken and egg situation!']
+    question_text: '"Numbers by day, magic by night... who might even pull a card from behind your ear during a review?"',
+    options: ['Vineet Gehani', 'Satish Kumar', 'Manish Sood']
   },
   {
-    question_text: 'How small can the ink droplets in an HP inkjet printhead be?',
-    options: ['1 nanolitre', '1.3 femtolitre', '1.5 picolitre', '0.8 millilitre']
+    question_text: '"Composed in chaos... is it instinct or years of navigating power and policy? Also, is he basically Harvey Specter with a better sense of humour?"',
+    options: ['Rajeev Nair', 'Vinod Bhatt', 'Ritesh Gandotra']
   },
   {
-    question_text: 'What is the maximum NPU processing capability that our AI PCs currently offer?',
-    options: ['128 BLIPS', '48 FLOPS', '50 TOPS', '512 MOPS']
+    question_text: '"Who says \'I don\'t want sweets\'... and still ends up eating chikkis all the time?"',
+    options: ['Subraneel Bose', 'Akash Batra', 'Ankur Goel']
   },
   {
-    question_text: 'Internal code name for next generation compute product being developed by HP IDC for launch in India & global market is:',
-    options: ['Mahabharat', 'Agni', 'Vayu', 'Arjuna']
+    question_text: '"Old soul, modern leader... believes great leadership, like old Hindi music, never goes out of style."',
+    options: ['Sanjeev Pathak', 'Shailesh Tripathi', 'Akshay Kumar']
   },
   {
-    question_text: 'How many countries and languages does the HP Customer Care Centre Bangalore support?',
-    options: ['6 countries, 3 languages', '38 countries, 16 languages', '16 countries, 6 languages', '21 countries, 5 languages']
+    question_text: '"Who has three cats and often says \'I strongly believe...\' in meetings?"',
+    options: ['Akash Batra', 'Rajeev Nair', 'Vineet Gehani']
   },
   {
-    question_text: 'How many podium finishes has the HP Ferrari Formula 1 team had in the 2026 Formula 1 season?',
-    options: ['1', '3', '2', '0']
+    question_text: '"Numbers wizard with an elephant\'s memory-you might forget, but he definitely won\'t!"',
+    options: ['Satish Kumar', 'Vineet Gehani', 'Vinod Bhatt']
   },
   {
-    question_text: 'What is one value that Ipsita holds dearly that shows up in how she is the MD of the company?',
-    options: ['Having a purpose beyond yourself', 'Conviction', 'Never settling', 'Restlessness']
+    question_text: '"Who among the leaders has technology patents in their name?"',
+    options: ['Manish Sood', 'Sanjeev Pathak', 'Ritesh Gandotra']
   },
   {
-    question_text: 'What powers Ipsita\'s typical workday?',
-    options: ['Green tea and calm', 'Structured planning', 'Coffee ! loads of it !', 'People.. Always!']
+    question_text: '"Which leader says - \'Rajje tere se hoga ya nahi... nahi toh main karunga... toh ho kar rahega!\'?"',
+    options: ['Manish Sood', 'Akshay Kumar', 'Ankur Goel']
   },
   {
-    question_text: 'What is Ipsita currently reading?',
-    options: ['The War of the Roses', 'Ghost-Eye', 'The Chip War', 'War and Peace']
+    question_text: '"Who often says - \'Let\'s peel the onion further\'?"',
+    options: ['Vinod Bhatt', 'Rajeev Nair', 'Shailesh Tripathi']
   },
   {
-    question_text: 'What does Ipsita love doing during her free time?',
-    options: ['Practising mindfulness', 'Building her personal AI Agent', 'Doom scrolling reels on Insta', 'Spending time with her family']
+    question_text: '"The man who has sold collaboration to everyone... except his own family?"',
+    options: ['Ritesh Gandotra', 'Ankur Goel', 'Akash Batra']
   },
   {
-    question_text: 'Is Ipsita a morning person or a night owl?',
-    options: ['Morning', 'Night', 'Neither', 'Both']
-  },
-  {
-    question_text: 'What does Ipsita prefer about her holidays:',
-    options: ['Planned to the minute', 'Completely spontaneous', 'Starts planned, goes completely offscript', 'Plans everything, abandons it by day 2']
+    question_text: '"Even his coffee breaks probably have an SLA..."',
+    options: ['Sanjeev Pathak', 'Ritesh Gandotra', 'Vineet Gehani']
   }
 ];
 
