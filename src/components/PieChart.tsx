@@ -24,7 +24,8 @@ function segmentsCountSafe(data: { [key: string]: number }, options: string[]) {
 }
 
 export function PieChart({ data, options }: PieChartProps) {
-  const total = Object.values(data).reduce((sum, val) => sum + val, 0);
+  const optionCounts = segmentsCountSafe(data, options);
+  const total = optionCounts.reduce((sum, val) => sum + val, 0);
   const chartFrameSize = 'clamp(170px, 16vw, 340px)';
   const solidCircleSize = 'clamp(150px, 14vw, 300px)';
   const statsWidth = 'clamp(225px, 15vw, 400px)';

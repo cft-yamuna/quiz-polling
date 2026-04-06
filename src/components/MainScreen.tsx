@@ -35,16 +35,6 @@ function areAnswerStatsEqual(a: AnswerStats, b: AnswerStats) {
   return aKeys.every((key) => a[key] === b[key]);
 }
 
-function mergeWithNonDecreasingCounts(current: AnswerStats, incoming: AnswerStats) {
-  const merged: AnswerStats = { ...incoming };
-
-  for (const [option, count] of Object.entries(current)) {
-    merged[option] = Math.max(count, merged[option] || 0);
-  }
-
-  return merged;
-}
-
 export function MainScreen() {
   const [poll, setPoll] = useState<Poll | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -121,10 +111,9 @@ export function MainScreen() {
       return;
     }
 
-    setAnswerStats((previous) => {
-      const merged = mergeWithNonDecreasingCounts(previous, results.counts);
-      return areAnswerStatsEqual(previous, merged) ? previous : merged;
-    });
+    setAnswerStats((previous) => (
+      areAnswerStatsEqual(previous, results.counts) ? previous : results.counts
+    ));
   }, []);
 
   const flushQueuedAnswerUpdates = useCallback(() => {
@@ -170,9 +159,19 @@ export function MainScreen() {
 
     if (questions && questions[poll.active_question_index]) {
       const question = questions[poll.active_question_index] as Question;
+      const hasQuestionChanged = activeQuestionIdRef.current !== question.id;
+
+      if (hasQuestionChanged) {
+        if (answerQueueTimerRef.current) {
+          clearTimeout(answerQueueTimerRef.current);
+          answerQueueTimerRef.current = null;
+        }
+        queuedAnswerIncrementsRef.current = {};
+        setAnswerStats({});
+      }
+
       setCurrentQuestion(question);
       activeQuestionIdRef.current = question.id;
-      queuedAnswerIncrementsRef.current = {};
       await loadAnswerStats(question.id);
       return;
     }
