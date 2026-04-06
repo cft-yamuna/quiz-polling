@@ -169,12 +169,12 @@ export function MainScreen() {
   const livePanelPadding = 'clamp(0.5rem, 1vw, 1.1rem)';
   const liveQuestionFontSize = 'clamp(18px, 1.95vw, 40px)';
   const liveOptionCardWidth = 'clamp(140px, 64%, 340px)';
-  const liveOptionCardHeight = 'clamp(34px, 2.45vw, 58px)';
-  const liveOptionBadgeSize = 'clamp(30px, 2.3vw, 54px)';
-  const liveOptionBadgeOffset = 'clamp(20px, 1.65vw, 42px)';
-  const liveOptionBadgeFontSize = 'clamp(18px, 1.2vw, 30px)';
+  const liveOptionCardHeight = 'clamp(52px, 3.8vw, 84px)';
+  const liveOptionBadgeSize = 'clamp(52px, 3.8vw, 84px)';
+  const liveOptionBadgeOffset = 'clamp(24px, 1.85vw, 44px)';
+  const liveOptionBadgeFontSize = 'clamp(22px, 1.6vw, 38px)';
   const liveOptionTextFontSize = 'clamp(14px, 1.05vw, 24px)';
-  const liveOptionPaddingLeft = 'clamp(26px, 1.55vw, 48px)';
+  const liveOptionPaddingLeft = 'clamp(34px, 2.1vw, 58px)';
   const liveOptionGridWidth = 'clamp(640px, 42vw, 1220px)';
   const liveQuestionToOptionsGap = 'clamp(0.8rem, 1.2vw, 1.9rem)';
   const liveOptionGridColumnGap = 'clamp(0.7rem, 1.3vw, 1.8rem)';
@@ -244,7 +244,7 @@ export function MainScreen() {
                 {currentQuestion && showLiveLayout ? (
                   <div
                     className="mx-auto w-full"
-                    style={{ maxWidth: 'min(100%, 62vw)', padding: livePanelPadding }}
+                    style={{ maxWidth: 'calc(min(100%, 62vw) - 40px)', padding: livePanelPadding }}
                   >
                     <div className="pb-2">
                       <h1
@@ -293,8 +293,14 @@ export function MainScreen() {
                             {option.label}
                           </div>
                           <p
-                            className="truncate whitespace-nowrap font-semibold tracking-[-0.03em] text-slate-950"
-                            style={{ fontSize: liveOptionTextFontSize }}
+                            className="font-semibold tracking-[-0.03em] text-slate-950 overflow-hidden"
+                            style={{
+                              fontSize: liveOptionTextFontSize,
+                              lineHeight: 1.12,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                            }}
                           >
                             {option.text}
                           </p>

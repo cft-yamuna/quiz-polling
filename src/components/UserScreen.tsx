@@ -334,21 +334,21 @@ export function UserScreen() {
             </h1>
           </div>
 
-          <div className="mx-auto mt-5 grid max-w-[228px] grid-cols-1 justify-items-center gap-3 min-[500px]:max-w-[474px] min-[500px]:grid-cols-2">
+          <div className="mx-auto mt-5 grid max-w-[262px] grid-cols-1 justify-items-center gap-4 min-[500px]:max-w-[548px] min-[500px]:grid-cols-2">
             {optionBadges.map((option, index) => (
               <button
                 key={`${option.key}-${index}`}
                 onClick={() => handleAnswer(option.text)}
                 disabled={isSubmitting}
-                className={`relative h-[64px] w-full max-w-[228px] text-left transition-opacity disabled:opacity-60 ${
+                className={`relative h-[74px] w-full max-w-[262px] text-left transition-opacity disabled:opacity-60 ${
                   optionBadges.length === 3 && index === 2 ? 'min-[500px]:col-span-2 min-[500px]:justify-self-center' : ''
                 }`}
               >
-                <div className="absolute inset-y-0 left-0 z-10 flex w-[64px] items-center justify-center rounded-full bg-[#FF5150] text-[1.18rem] font-black leading-none text-white sm:text-[1.28rem]">
+                <div className="absolute inset-y-0 left-0 z-10 flex w-[72px] items-center justify-center rounded-full bg-[#FF5150] text-[1.24rem] font-black leading-none text-white sm:text-[1.34rem]">
                   {option.label}
                 </div>
-                <div className="absolute inset-y-0 left-[32px] z-0 flex right-0 items-center rounded-[8px] border border-white/20 bg-[#1652F0] pl-[2.7rem] pr-3">
-                  <span className="text-[1.06rem] font-medium leading-tight tracking-[-0.03em] text-white sm:text-[1.16rem]">
+                <div className="absolute inset-y-0 left-[36px] z-0 flex right-0 items-center rounded-[8px] border border-white/20 bg-[#1652F0] pl-[3rem] pr-4">
+                  <span className="text-[1.08rem] font-medium leading-tight tracking-[-0.03em] text-white sm:text-[1.18rem]">
                     {option.text}
                   </span>
                 </div>
