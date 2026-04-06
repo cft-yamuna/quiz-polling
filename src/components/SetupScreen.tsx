@@ -12,47 +12,47 @@ const DEFAULT_POLL_TITLE = 'Team Pulse Check';
 
 const DEFAULT_QUESTIONS: QuestionInput[] = [
   {
-    question_text: '"Numbers by day, magic by night... who might even pull a card from behind your ear during a review?"',
+    question_text: 'Numbers by day, magic by night... who might even pull a card from behind your ear during a review?',
     options: ['Vineet Gehani', 'Satish Kumar', 'Manish Sood']
   },
   {
-    question_text: '"Composed in chaos... is it instinct or years of navigating power and policy? Also, is he basically Harvey Specter with a better sense of humour?"',
+    question_text: 'Composed in chaos... is it instinct or years of navigating power and policy? Also, is he basically Harvey Specter with a better sense of humour?',
     options: ['Rajeev Nair', 'Vinod Bhatt', 'Ritesh Gandotra']
   },
   {
-    question_text: '"Who says \'I don\'t want sweets\'... and still ends up eating chikkis all the time?"',
+    question_text: 'Who says \'I don\'t want sweets\'... and still ends up eating chikkis all the time?',
     options: ['Subraneel Bose', 'Akash Batra', 'Ankur Goel']
   },
   {
-    question_text: '"Old soul, modern leader... believes great leadership, like old Hindi music, never goes out of style."',
+    question_text: 'Old soul, modern leader... believes great leadership, like old Hindi music, never goes out of style.',
     options: ['Sanjeev Pathak', 'Shailesh Tripathi', 'Akshay Kumar']
   },
   {
-    question_text: '"Who has three cats and often says \'I strongly believe...\' in meetings?"',
+    question_text: 'Who has three cats and often says \'I strongly believe...\' in meetings?',
     options: ['Akash Batra', 'Rajeev Nair', 'Vineet Gehani']
   },
   {
-    question_text: '"Numbers wizard with an elephant\'s memory-you might forget, but he definitely won\'t!"',
+    question_text: 'Numbers wizard with an elephant\'s memory-you might forget, but he definitely won\'t!',
     options: ['Satish Kumar', 'Vineet Gehani', 'Vinod Bhatt']
   },
   {
-    question_text: '"Who among the leaders has technology patents in their name?"',
+    question_text: 'Who among the leaders has technology patents in their name?',
     options: ['Manish Sood', 'Sanjeev Pathak', 'Ritesh Gandotra']
   },
   {
-    question_text: '"Which leader says - \'Rajje tere se hoga ya nahi... nahi toh main karunga... toh ho kar rahega!\'?"',
+    question_text: 'Which leader says - \'Rajje tere se hoga ya nahi... nahi toh main karunga... toh ho kar rahega!\'?',
     options: ['Manish Sood', 'Akshay Kumar', 'Ankur Goel']
   },
   {
-    question_text: '"Who often says - \'Let\'s peel the onion further\'?"',
+    question_text: 'Who often says - \'Let\'s peel the onion further\'?',
     options: ['Vinod Bhatt', 'Rajeev Nair', 'Shailesh Tripathi']
   },
   {
-    question_text: '"The man who has sold collaboration to everyone... except his own family?"',
+    question_text: 'The man who has sold collaboration to everyone... except his own family?',
     options: ['Ritesh Gandotra', 'Ankur Goel', 'Akash Batra']
   },
   {
-    question_text: '"Even his coffee breaks probably have an SLA..."',
+    question_text: 'Even his coffee breaks probably have an SLA...',
     options: ['Sanjeev Pathak', 'Ritesh Gandotra', 'Vineet Gehani']
   }
 ];
