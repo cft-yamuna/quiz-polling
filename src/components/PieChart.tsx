@@ -212,7 +212,10 @@ export function PieChart({ data, options }: PieChartProps) {
         style={{ width: statsWidth, maxWidth: '100%' }}
       >
         {segments.map((segment, index) => (
-          <div key={index} className="min-w-0">
+          <div
+            key={index}
+            className={`min-w-0 ${segments.length === 3 && index === 2 ? 'col-span-2 justify-self-center' : ''}`}
+          >
             <p
               className="font-black leading-none tracking-[-0.06em] text-[#1652F0]"
               style={{
