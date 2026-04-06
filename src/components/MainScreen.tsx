@@ -189,12 +189,14 @@ export function MainScreen() {
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <img
-          src="/logo.png"
-          alt="Logo"
-          className="absolute left-0 top-0 z-20 object-contain"
-          style={{ width: '107px', height: '110px', padding: '16px' }}
-        />
+        {showLiveLayout && (
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="absolute left-0 top-0 z-20 object-contain"
+            style={{ width: '107px', height: '110px', padding: '16px' }}
+          />
+        )}
 
         <div className="relative z-10 h-full w-full px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
             {!showLiveLayout ? (
