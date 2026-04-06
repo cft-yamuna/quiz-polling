@@ -35,6 +35,16 @@ function areAnswerStatsEqual(a: AnswerStats, b: AnswerStats) {
   return aKeys.every((key) => a[key] === b[key]);
 }
 
+function mergeWithNonDecreasingCounts(current: AnswerStats, incoming: AnswerStats) {
+  const merged: AnswerStats = { ...incoming };
+
+  for (const [option, count] of Object.entries(current)) {
+    merged[option] = Math.max(count, merged[option] || 0);
+  }
+
+  return merged;
+}
+
 export function MainScreen() {
   const [poll, setPoll] = useState<Poll | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -42,7 +52,8 @@ export function MainScreen() {
   const [isLoadingPoll, setIsLoadingPoll] = useState(true);
   const answerLoadRequestRef = useRef(0);
   const activeQuestionIdRef = useRef<string | undefined>(undefined);
-  const answerRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const answerQueueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queuedAnswerIncrementsRef = useRef<AnswerStats>({});
 
   const userUrl = buildPollUrl('user');
   const showLiveLayout = Boolean(poll?.is_display_started);
@@ -70,9 +81,9 @@ export function MainScreen() {
 
   useEffect(() => {
     return () => {
-      if (answerRefreshTimerRef.current) {
-        clearTimeout(answerRefreshTimerRef.current);
-        answerRefreshTimerRef.current = null;
+      if (answerQueueTimerRef.current) {
+        clearTimeout(answerQueueTimerRef.current);
+        answerQueueTimerRef.current = null;
       }
     };
   }, []);
@@ -92,16 +103,11 @@ export function MainScreen() {
       setCurrentQuestion(null);
       setAnswerStats({});
       activeQuestionIdRef.current = undefined;
+      queuedAnswerIncrementsRef.current = {};
     }
 
     setIsLoadingPoll(false);
   };
-
-  const applyAnswerStats = useCallback((nextCounts: AnswerStats) => {
-    setAnswerStats((previous) => (
-      areAnswerStatsEqual(previous, nextCounts) ? previous : nextCounts
-    ));
-  }, []);
 
   const loadAnswerStats = useCallback(async (questionId: string) => {
     const requestId = ++answerLoadRequestRef.current;
@@ -115,19 +121,43 @@ export function MainScreen() {
       return;
     }
 
-    applyAnswerStats(results.counts);
-  }, [applyAnswerStats]);
+    setAnswerStats((previous) => {
+      const merged = mergeWithNonDecreasingCounts(previous, results.counts);
+      return areAnswerStatsEqual(previous, merged) ? previous : merged;
+    });
+  }, []);
 
-  const scheduleAnswerStatsRefresh = useCallback((questionId: string) => {
-    if (answerRefreshTimerRef.current) {
+  const flushQueuedAnswerUpdates = useCallback(() => {
+    const queued = queuedAnswerIncrementsRef.current;
+    queuedAnswerIncrementsRef.current = {};
+
+    if (Object.keys(queued).length === 0) {
       return;
     }
 
-    answerRefreshTimerRef.current = setTimeout(() => {
-      answerRefreshTimerRef.current = null;
-      void loadAnswerStats(questionId);
-    }, 160);
-  }, [loadAnswerStats]);
+    setAnswerStats((previous) => {
+      const next: AnswerStats = { ...previous };
+
+      for (const [option, increment] of Object.entries(queued)) {
+        next[option] = (next[option] || 0) + increment;
+      }
+
+      return areAnswerStatsEqual(previous, next) ? previous : next;
+    });
+  }, []);
+
+  const enqueueAnswerUpdate = useCallback((answer: string) => {
+    queuedAnswerIncrementsRef.current[answer] = (queuedAnswerIncrementsRef.current[answer] || 0) + 1;
+
+    if (answerQueueTimerRef.current) {
+      return;
+    }
+
+    answerQueueTimerRef.current = setTimeout(() => {
+      answerQueueTimerRef.current = null;
+      flushQueuedAnswerUpdates();
+    }, 180);
+  }, [flushQueuedAnswerUpdates]);
 
   const loadCurrentQuestion = async () => {
     if (!poll) return;
@@ -142,12 +172,14 @@ export function MainScreen() {
       const question = questions[poll.active_question_index] as Question;
       setCurrentQuestion(question);
       activeQuestionIdRef.current = question.id;
+      queuedAnswerIncrementsRef.current = {};
       await loadAnswerStats(question.id);
       return;
     }
 
     setCurrentQuestion(null);
     activeQuestionIdRef.current = undefined;
+    queuedAnswerIncrementsRef.current = {};
     setAnswerStats({});
   };
 
@@ -181,21 +213,32 @@ export function MainScreen() {
       ? supabase
           .channel(`answer-updates-${currentQuestionId}`)
           .on('postgres_changes', {
-            event: '*',
+            event: 'INSERT',
             schema: 'public',
             table: 'answers',
             filter: `question_id=eq.${currentQuestionId}`
-          }, () => {
-            scheduleAnswerStatsRefresh(currentQuestionId);
+          }, (payload) => {
+            const insertedAnswer = (payload.new as { answer?: unknown } | null)?.answer;
+
+            if (typeof insertedAnswer !== 'string' || insertedAnswer.length === 0) {
+              return;
+            }
+
+            if (activeQuestionIdRef.current !== currentQuestionId) {
+              return;
+            }
+
+            enqueueAnswerUpdate(insertedAnswer);
           })
           .subscribe()
       : null;
 
     return () => {
-      if (answerRefreshTimerRef.current) {
-        clearTimeout(answerRefreshTimerRef.current);
-        answerRefreshTimerRef.current = null;
+      if (answerQueueTimerRef.current) {
+        clearTimeout(answerQueueTimerRef.current);
+        answerQueueTimerRef.current = null;
       }
+      queuedAnswerIncrementsRef.current = {};
       void latestPollChannel.unsubscribe();
       if (pollChannel) {
         void pollChannel.unsubscribe();
@@ -204,7 +247,7 @@ export function MainScreen() {
         void answerChannel.unsubscribe();
       }
     };
-  }, [scheduleAnswerStatsRefresh]);
+  }, [enqueueAnswerUpdate]);
 
   if (isLoadingPoll) {
     return <div className="min-h-screen bg-white flex items-center justify-center">
