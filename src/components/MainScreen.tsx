@@ -226,6 +226,8 @@ export function MainScreen() {
   const liveQrSize = 'clamp(90px, 6vw, 180px)';
   const livePanelPadding = 'clamp(0.5rem, 1vw, 1.1rem)';
   const liveQuestionFontSize = 'clamp(18px, 1.95vw, 40px)';
+  const liveQuestionPanelMaxWidth = 'calc(min(100%, 50vw) - 40px)';
+  const liveQuestionTextRightPadding = 'clamp(0.6rem, 1.8vw, 2.1rem)';
   const liveOptionCardWidth = 'clamp(140px, 64%, 340px)';
   const liveOptionCardHeight = 'clamp(52px, 3.8vw, 84px)';
   const liveOptionBadgeSize = 'clamp(52px, 3.8vw, 84px)';
@@ -304,12 +306,15 @@ export function MainScreen() {
                 {currentQuestion && showLiveLayout ? (
                   <div
                     className="mx-auto w-full"
-                    style={{ maxWidth: 'calc(min(100%, 62vw) - 40px)', padding: livePanelPadding }}
+                    style={{ maxWidth: liveQuestionPanelMaxWidth, padding: livePanelPadding }}
                   >
                     <div className="pb-2">
                       <h1
                         className="text-center font-semibold tracking-[-0.04em] leading-[1.14] text-white"
-                        style={{ fontSize: liveQuestionFontSize }}
+                        style={{
+                          fontSize: liveQuestionFontSize,
+                          paddingRight: liveQuestionTextRightPadding,
+                        }}
                       >
                         {`Q${poll.active_question_index + 1}. ${currentQuestion.question_text}`}
                       </h1>
