@@ -47,7 +47,51 @@ export function UserScreen() {
 
     setCurrentQuestion(null);
     setHasAnswered(false);
-  }, [poll?.id, poll?.active_question_index, participant]);
+  }, [poll?.id, poll?.active_question_index, poll?.is_display_started, participant]);
+
+  useEffect(() => {
+    if (!poll || !participant || !poll.is_display_started || currentQuestion) {
+      return;
+    }
+
+    const retryId = window.setInterval(() => {
+      void loadLatestPoll();
+      void loadCurrentQuestion();
+    }, 2000);
+
+    return () => {
+      window.clearInterval(retryId);
+    };
+  }, [poll?.id, poll?.active_question_index, poll?.is_display_started, participant, currentQuestion]);
+
+  useEffect(() => {
+    if (!poll || !participant) {
+      return;
+    }
+
+    const resync = () => {
+      void loadLatestPoll();
+      if (poll.is_display_started) {
+        void loadCurrentQuestion();
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (!document.hidden) {
+        resync();
+      }
+    };
+
+    window.addEventListener('focus', resync);
+    window.addEventListener('online', resync);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', resync);
+      window.removeEventListener('online', resync);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [poll?.id, poll?.is_display_started, participant]);
 
   const getParticipantStorageKey = (pollId: string) => {
     return `poll-participant:${pollId}`;
@@ -84,11 +128,15 @@ export function UserScreen() {
   const loadCurrentQuestion = async () => {
     if (!poll) return;
 
-    const { data: questions } = await supabase
+    const { data: questions, error } = await supabase
       .from('questions')
       .select('*')
       .eq('poll_id', poll.id)
       .order('order_index');
+
+    if (error) {
+      return;
+    }
 
     if (questions && questions[poll.active_question_index]) {
       const question = questions[poll.active_question_index] as Question;
