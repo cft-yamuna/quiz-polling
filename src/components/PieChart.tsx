@@ -208,7 +208,7 @@ export function PieChart({ data, options }: PieChartProps) {
       </div>
 
       <div
-        className="grid w-full grid-cols-2 gap-x-2 gap-y-2"
+        className="mt-2 xl:mt-3 grid w-full grid-cols-2 gap-x-2 gap-y-2"
         style={{ width: statsWidth, maxWidth: '100%' }}
       >
         {segments.map((segment, index) => (

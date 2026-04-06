@@ -322,7 +322,10 @@ export function MainScreen() {
 
               <div
                 className="justify-self-center xl:justify-self-end"
-                style={{ padding: 'clamp(0.4rem, 0.9vw, 1.5rem)' }}
+                style={{
+                  padding: 'clamp(0.4rem, 0.9vw, 1.5rem)',
+                  paddingTop: 'clamp(1.1rem, 2.1vw, 2.8rem)',
+                }}
               >
                 <PieChart
                   data={answerStats}
