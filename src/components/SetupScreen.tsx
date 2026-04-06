@@ -12,24 +12,52 @@ const DEFAULT_POLL_TITLE = 'Team Pulse Check';
 
 const DEFAULT_QUESTIONS: QuestionInput[] = [
   {
-    question_text: 'How satisfied are you with today\'s session?',
-    options: ['Very satisfied', 'Satisfied', 'Neutral', 'Needs improvement']
+    question_text: 'What came first in HP, the PC or the Printer?',
+    options: ['PC', 'Printer', 'Neither', 'A real chicken and egg situation!']
   },
   {
-    question_text: 'Which area should we improve next?',
-    options: ['Speed', 'Design', 'Features', 'Support']
+    question_text: 'How small can the ink droplets in an HP inkjet printhead be?',
+    options: ['1 nanolitre', '1.3 femtolitre', '1.5 picolitre', '0.8 millilitre']
   },
   {
-    question_text: 'How easy was it to join the poll?',
-    options: ['Very easy', 'Easy', 'Average', 'Difficult']
+    question_text: 'What is the maximum NPU processing capability that our AI PCs currently offer?',
+    options: ['128 BLIPS', '48 FLOPS', '50 TOPS', '512 MOPS']
   },
   {
-    question_text: 'Which device are you using right now?',
-    options: ['Mobile', 'Laptop', 'Tablet', 'Desktop']
+    question_text: 'Internal code name for next generation compute product being developed by HP IDC for launch in India & global market is:',
+    options: ['Mahabharat', 'Agni', 'Vayu', 'Arjuna']
   },
   {
-    question_text: 'Would you join this type of poll again?',
-    options: ['Definitely', 'Maybe', 'Not sure', 'No']
+    question_text: 'How many countries and languages does the HP Customer Care Centre Bangalore support?',
+    options: ['6 countries, 3 languages', '38 countries, 16 languages', '16 countries, 6 languages', '21 countries, 5 languages']
+  },
+  {
+    question_text: 'How many podium finishes has the HP Ferrari Formula 1 team had in the 2026 Formula 1 season?',
+    options: ['1', '3', '2', '0']
+  },
+  {
+    question_text: 'What is one value that Ipsita holds dearly that shows up in how she is the MD of the company?',
+    options: ['Having a purpose beyond yourself', 'Conviction', 'Never settling', 'Restlessness']
+  },
+  {
+    question_text: 'What powers Ipsita\'s typical workday?',
+    options: ['Green tea and calm', 'Structured planning', 'Coffee ! loads of it !', 'People.. Always!']
+  },
+  {
+    question_text: 'What is Ipsita currently reading?',
+    options: ['The War of the Roses', 'Ghost-Eye', 'The Chip War', 'War and Peace']
+  },
+  {
+    question_text: 'What does Ipsita love doing during her free time?',
+    options: ['Practising mindfulness', 'Building her personal AI Agent', 'Doom scrolling reels on Insta', 'Spending time with her family']
+  },
+  {
+    question_text: 'Is Ipsita a morning person or a night owl?',
+    options: ['Morning', 'Night', 'Neither', 'Both']
+  },
+  {
+    question_text: 'What does Ipsita prefer about her holidays:',
+    options: ['Planned to the minute', 'Completely spontaneous', 'Starts planned, goes completely offscript', 'Plans everything, abandons it by day 2']
   }
 ];
 

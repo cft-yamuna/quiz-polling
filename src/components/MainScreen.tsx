@@ -172,10 +172,13 @@ export function MainScreen() {
   const liveOptionCardHeight = 'clamp(34px, 2.45vw, 58px)';
   const liveOptionBadgeSize = 'clamp(30px, 2.3vw, 54px)';
   const liveOptionBadgeOffset = 'clamp(20px, 1.65vw, 42px)';
-  const liveOptionBadgeFontSize = 'clamp(13px, 0.8vw, 20px)';
-  const liveOptionTextFontSize = 'clamp(11px, 0.82vw, 18px)';
+  const liveOptionBadgeFontSize = 'clamp(18px, 1.2vw, 30px)';
+  const liveOptionTextFontSize = 'clamp(14px, 1.05vw, 24px)';
   const liveOptionPaddingLeft = 'clamp(26px, 1.55vw, 48px)';
   const liveOptionGridWidth = 'clamp(640px, 42vw, 1220px)';
+  const liveQuestionToOptionsGap = 'clamp(0.8rem, 1.2vw, 1.9rem)';
+  const liveOptionGridColumnGap = 'clamp(0.7rem, 1.3vw, 1.8rem)';
+  const liveOptionGridRowGap = 'clamp(0.7rem, 1.3vw, 1.8rem)';
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center overflow-hidden bg-black">
@@ -185,6 +188,12 @@ export function MainScreen() {
           alt=""
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover"
+        />
+        <img
+          src="/logo.png"
+          alt="Logo"
+          className="absolute left-0 top-0 z-20 object-contain"
+          style={{ width: '107px', height: '110px', padding: '16px' }}
         />
 
         <div className="relative z-10 h-full w-full px-4 py-3 sm:px-6 sm:py-4 lg:px-8 lg:py-5">
@@ -214,7 +223,7 @@ export function MainScreen() {
                 <div className="flex flex-col items-center gap-3 xl:items-start">
                   <p
                     className="text-center font-semibold tracking-[-0.03em] xl:text-left"
-                    style={{ fontSize: 'clamp(13px, 1vw, 26px)', color: '#FFFFFF', lineHeight: 1.1 }}
+                    style={{ fontSize: 'clamp(18px, 1.5vw, 36px)', color: '#FFFFFF', lineHeight: 1.1 }}
                   >
                     <span className="block">
                       Scan the <span style={{ color: '#FF5150' }}>QR code</span>.
@@ -247,8 +256,13 @@ export function MainScreen() {
                     </div>
 
                     <div
-                      className="mx-auto mt-1 grid w-full grid-cols-2 gap-y-3"
-                      style={{ maxWidth: liveOptionGridWidth, columnGap: 'clamp(0.25rem, 0.6vw, 0.8rem)' }}
+                      className="mx-auto grid w-full grid-cols-2"
+                      style={{
+                        maxWidth: liveOptionGridWidth,
+                        marginTop: liveQuestionToOptionsGap,
+                        columnGap: liveOptionGridColumnGap,
+                        rowGap: liveOptionGridRowGap,
+                      }}
                     >
                       {optionBadges.map((option, index) => {
                         const optionAlignmentClass = optionBadges.length === 3 && index === 2
