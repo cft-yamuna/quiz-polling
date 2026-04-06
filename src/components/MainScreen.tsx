@@ -174,7 +174,7 @@ export function MainScreen() {
   const liveOptionBadgeOffset = 'clamp(24px, 1.85vw, 44px)';
   const liveOptionBadgeFontSize = 'clamp(22px, 1.6vw, 38px)';
   const liveOptionTextFontSize = 'clamp(14px, 1.05vw, 24px)';
-  const liveOptionPaddingLeft = 'clamp(34px, 2.1vw, 58px)';
+  const liveOptionPaddingLeft = 'clamp(40px, 2.4vw, 64px)';
   const liveOptionGridWidth = 'clamp(640px, 42vw, 1220px)';
   const liveQuestionToOptionsGap = 'clamp(0.8rem, 1.2vw, 1.9rem)';
   const liveOptionGridColumnGap = 'clamp(0.7rem, 1.3vw, 1.8rem)';
